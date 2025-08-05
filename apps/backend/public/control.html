@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎛️ لوحة التحكم - البوت الذكي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #25D366;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .nav-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .nav-bar a {
+            color: #25D366;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 40px;
+        }
+        .control-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #25D366;
+        }
+        .status-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+        .status-starting { background: #ffc107; }
+        .btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .logs-container {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .alert-error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎛️ لوحة التحكم</h1>
+            <p>إدارة البوت الذكي عن بُعد</p>
+        </div>
+        
+        <div class="nav-bar">
+            <a href="/">🏠 الصفحة الرئيسية</a>
+            <a href="/admin">🛠️ إدارة الردود</a>
+            <a href="/profile">👤 إدارة الملف الشخصي</a>
+            <a href="/control">🎛️ لوحة التحكم</a>
+        </div>
+        
+        <div class="content">
+            <div id="alert" class="alert hidden"></div>
+            
+            <!-- Bot Status Section -->
+            <div class="control-section">
+                <h3>حالة البوت</h3>
+                <div class="status-display">
+                    <div>
+                        <span id="bot-status-text">فحص الحالة...</span>
+                        <span id="bot-status-indicator" class="status-indicator status-starting"></span>
+                    </div>
+                    <div>
+                        <span id="uptime">وقت التشغيل: --</span>
+                    </div>
+                </div>
+                <div id="memory-usage">استخدام الذاكرة: --</div>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="control-section">
+                <h3>التحكم في البوت</h3>
+                <button class="btn" onclick="startBot()" id="start-btn">🚀 تشغيل البوت</button>
+                <button class="btn btn-warning" onclick="restartBot()" id="restart-btn">🔄 إعادة تشغيل</button>
+                <button class="btn btn-danger" onclick="stopBot()" id="stop-btn">⏹️ إيقاف البوت</button>
+                <button class="btn" onclick="refreshStatus()">🔍 تحديث الحالة</button>
+            </div>
+            
+            <!-- System Information -->
+            <div class="control-section">
+                <h3>معلومات النظام</h3>
+                <div id="system-info">
+                    <p>📊 <strong>المنفذ:</strong> 3001</p>
+                    <p>🔧 <strong>إدارة العمليات:</strong> PM2</p>
+                    <p>🌐 <strong>البيئة:</strong> <span id="env-info">إنتاج</span></p>
+                </div>
+            </div>
+            
+            <!-- Logs Section -->
+            <div class="control-section">
+                <h3>سجلات البوت (آخر 10 رسائل)</h3>
+                <button class="btn" onclick="showLogs()">📋 عرض السجلات</button>
+                <button class="btn" onclick="clearLogs()">🧹 مسح السجلات</button>
+                <div id="logs-container" class="logs-container hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statusCheckInterval;
+
+        // Auto-refresh status every 5 seconds
+        window.onload = function() {
+            refreshStatus();
+            statusCheckInterval = setInterval(refreshStatus, 5000);
+        };
+
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            setTimeout(() => alert.classList.add('hidden'), 5000);
+        }
+
+        async function refreshStatus() {
+            try {
+                // Try main bot first (port 3001)
+                let response;
+                try {
+                    response = await fetch('/api/bot/status');
+                } catch (error) {
+                    // If main bot is down, try bot manager (port 3002)
+                    response = await fetch('http://localhost:3002/api/bot/status');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStatusDisplay(data.data);
+                } else {
+                    showAlert('فشل في جلب حالة البوت', 'error');
+                }
+            } catch (error) {
+                console.error('Error fetching status:', error);
+                updateStatusDisplay({ status: 'offline', message: 'غير متصل' });
+            }
+        }
+
+        function updateStatusDisplay(statusData) {
+            const statusText = document.getElementById('bot-status-text');
+            const statusIndicator = document.getElementById('bot-status-indicator');
+            const uptime = document.getElementById('uptime');
+            const memory = document.getElementById('memory-usage');
+            
+            // Update status text and indicator
+            statusText.textContent = statusData.message || 'غير معروف';
+            statusIndicator.className = `status-indicator status-${statusData.status}`;
+            
+            // Update uptime and memory
+            uptime.textContent = `وقت التشغيل: ${statusData.uptime || '--'}`;
+            memory.textContent = `استخدام الذاكرة: ${statusData.memory || '--'}`;
+            
+            // Enable/disable buttons based on status
+            updateButtonStates(statusData.status);
+        }
+
+        function updateButtonStates(status) {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            
+            if (status === 'online') {
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                restartBtn.disabled = false;
+            } else {
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                restartBtn.disabled = true;
+            }
+        }
+
+        async function startBot() {
+            showAlert('جاري تشغيل البوت...', 'success');
+            try {
+                // Try both endpoints
+                let response;
+                try {
+                    response = await fetch('/api/bot/start', { method: 'POST' });
+                } catch (error) {
+                    response = await fetch('http://localhost:3002/api/bot/start', { method: 'POST' });
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('تم تشغيل البوت بنجاح!', 'success');
+                    setTimeout(refreshStatus, 2000);
+                } else {
+                    showAlert(data.error?.message || 'فشل في تشغيل البوت', 'error');
+                }
+            } catch (error) {
+                showAlert('خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function stopBot() {
+            if (confirm('هل أنت متأكد من إيقاف البوت؟')) {
+                showAlert('جاري إيقاف البوت...', 'success');
+                try {
+                    // Try both endpoints
+                    let response;
+                    try {
+                        response = await fetch('/api/bot/stop', { method: 'POST' });
+                    } catch (error) {
+                        response = await fetch('http://localhost:3002/api/bot/stop', { method: 'POST' });
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showAlert('تم إيقاف البوت بنجاح!', 'success');
+                        setTimeout(refreshStatus, 2000);
+                    } else {
+                        showAlert(data.error?.message || 'فشل في إيقاف البوت', 'error');
+                    }
+                } catch (error) {
+                    showAlert('خطأ في الاتصال', 'error');
+                }
+            }
+        }
+
+        async function restartBot() {
+            showAlert('جاري إعادة تشغيل البوت...', 'success');
+            try {
+                // Try both endpoints
+                let response;
+                try {
+                    response = await fetch('/api/bot/restart', { method: 'POST' });
+                } catch (error) {
+                    response = await fetch('http://localhost:3002/api/bot/restart', { method: 'POST' });
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('تم إعادة تشغيل البوت بنجاح!', 'success');
+                    setTimeout(refreshStatus, 3000);
+                } else {
+                    showAlert(data.error?.message || 'فشل في إعادة تشغيل البوت', 'error');
+                }
+            } catch (error) {
+                showAlert('خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function showLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            logsContainer.innerHTML = 'جاري تحميل السجلات...';
+            logsContainer.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/api/bot/logs');
+                const data = await response.json();
+                
+                if (data.success) {
+                    logsContainer.innerHTML = data.data.logs || 'لا توجد سجلات متاحة';
+                } else {
+                    logsContainer.innerHTML = 'فشل في تحميل السجلات';
+                }
+            } catch (error) {
+                logsContainer.innerHTML = 'خطأ في الاتصال';
+            }
+        }
+
+        function clearLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            logsContainer.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

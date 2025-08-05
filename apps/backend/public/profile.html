@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الملف الشخصي - البوت الذكي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .mode-card {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-active {
+            background: #28a745;
+        }
+
+        .status-busy {
+            background: #ffc107;
+        }
+
+        .status-offline {
+            background: #dc3545;
+        }
+
+        .service-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .service-tag {
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .service-tag:hover {
+            background: #dee2e6;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 إدارة الملف الشخصي</h1>
+            <p>تخصيص البوت الذكي حسب احتياجاتك</p>
+        </div>
+
+        <!-- Navigation Bar -->
+        <div style="background: white; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <a href="/" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">🏠 الصفحة الرئيسية</a>
+            <a href="/admin" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">🛠️ إدارة الردود</a>
+            <a href="/profile" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">👤 إدارة الملف الشخصي</a>
+            <a href="/control" style="color: #667eea; text-decoration: none; margin: 0 15px; font-weight: bold;">🎛️ لوحة التحكم</a>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('profile')">الملف الشخصي</button>
+            <button class="tab-button" onclick="showTab('business')">معلومات العمل</button>
+            <button class="tab-button" onclick="showTab('bot-modes')">أنماط البوت</button>
+            <button class="tab-button" onclick="showTab('settings')">الإعدادات</button>
+        </div>
+
+        <div class="content">
+            <div id="alert" class="alert hidden"></div>
+
+            <!-- Personal Profile Tab -->
+            <div id="profile-tab" class="tab-content active">
+                <h2>المعلومات الشخصية</h2>
+                
+                <div class="form-group">
+                    <label>الاسم:</label>
+                    <input type="text" id="name" placeholder="اسمك">
+                </div>
+
+                <div class="form-group">
+                    <label>المهنة:</label>
+                    <input type="text" id="profession" placeholder="مطور مواقع">
+                </div>
+
+                <div class="form-group">
+                    <label>الموقع:</label>
+                    <input type="text" id="location" placeholder="الرياض، السعودية">
+                </div>
+
+                <div class="form-group">
+                    <label>الحالة الحالية:</label>
+                    <select id="status">
+                        <option value="متاح">متاح</option>
+                        <option value="مشغول">مشغول</option>
+                        <option value="نايم">نايم</option>
+                        <option value="في اجتماع">في اجتماع</option>
+                        <option value="غير متاح">غير متاح</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>الشخصية:</label>
+                    <input type="text" id="personality" placeholder="ودود، مساعد، محترف">
+                </div>
+
+                <div class="form-group">
+                    <label>ساعات العمل:</label>
+                    <input type="text" id="workingHours" placeholder="09:00-18:00">
+                </div>
+
+                <button class="btn" onclick="updateProfile()">حفظ المعلومات الشخصية</button>
+            </div>
+
+            <!-- Business Info Tab -->
+            <div id="business-tab" class="tab-content">
+                <h2>معلومات العمل</h2>
+                
+                <div class="form-group">
+                    <label>الخدمات (واحدة في كل سطر):</label>
+                    <textarea id="services" placeholder="تطوير المواقع&#10;تطبيقات الذكاء الاصطناعي&#10;استشارات تقنية"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>الخبرة:</label>
+                    <input type="text" id="experience" placeholder="5+ سنوات في تطوير البرمجيات">
+                </div>
+
+                <div class="form-group">
+                    <label>التخصصات (واحدة في كل سطر):</label>
+                    <textarea id="specialties" placeholder="React و Next.js&#10;Node.js و Express&#10;Python و AI/ML"></textarea>
+                </div>
+
+                <h3>الأسعار</h3>
+                
+                <div class="form-group">
+                    <label>تطوير المواقع:</label>
+                    <input type="text" id="pricing-website" placeholder="من 2000 ريال">
+                </div>
+
+                <div class="form-group">
+                    <label>تطوير ChatBot:</label>
+                    <input type="text" id="pricing-chatbot" placeholder="من 1500 ريال">
+                </div>
+
+                <div class="form-group">
+                    <label>حلول الذكاء الاصطناعي:</label>
+                    <input type="text" id="pricing-ai" placeholder="من 3000 ريال">
+                </div>
+
+                <div class="form-group">
+                    <label>الاستشارات:</label>
+                    <input type="text" id="pricing-consultation" placeholder="300 ريال/ساعة">
+                </div>
+
+                <button class="btn" onclick="updateBusinessInfo()">حفظ معلومات العمل</button>
+            </div>
+
+            <!-- Bot Modes Tab -->
+            <div id="bot-modes-tab" class="tab-content">
+                <h2>أنماط البوت</h2>
+                <p>اختر نمط البوت المناسب لاحتياجاتك:</p>
+
+                <div class="mode-selector">
+                    <div class="mode-card" data-mode="personal">
+                        <h3>🏠 شخصي</h3>
+                        <p>ردود شخصية فقط عن حالتك ومعلوماتك</p>
+                    </div>
+
+                    <div class="mode-card" data-mode="business">
+                        <h3>💼 مهني</h3>
+                        <p>ردود مهنية فقط عن الخدمات والأسعار</p>
+                    </div>
+
+                    <div class="mode-card" data-mode="mixed">
+                        <h3>🔄 مختلط</h3>
+                        <p>شخصي أولاً، ثم مهني، ثم GPT</p>
+                    </div>
+
+                    <div class="mode-card" data-mode="general">
+                        <h3>🤖 عام</h3>
+                        <p>GPT عام مع شخصيتك</p>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="updateBotMode()">حفظ نمط البوت</button>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content">
+                <h2>الإعدادات المتقدمة</h2>
+
+                <div class="form-group">
+                    <label>تحديث سريع للحالة:</label>
+                    <select id="quick-status">
+                        <option value="متاح">متاح</option>
+                        <option value="مشغول">مشغول</option>
+                        <option value="نايم">نايم</option>
+                        <option value="في اجتماع">في اجتماع</option>
+                        <option value="غير متاح">غير متاح</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="quickUpdateStatus()">تحديث الحالة</button>
+                </div>
+
+                <div class="form-group">
+                    <h3>إدارة الخدمات</h3>
+                    <input type="text" id="new-service" placeholder="خدمة جديدة">
+                    <button class="btn btn-secondary" onclick="addService()">إضافة خدمة</button>
+                </div>
+
+                <div class="form-group">
+                    <h3>تصدير البيانات</h3>
+                    <button class="btn btn-secondary" onclick="exportProfile()">تصدير الملف الشخصي</button>
+                    <button class="btn btn-secondary" onclick="resetProfile()">إعادة تعيين</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProfile = null;
+        let selectedBotMode = 'mixed';
+
+        // Load profile on page load
+        document.addEventListener('DOMContentLoaded', loadProfile);
+
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentProfile = result.data;
+                    populateFields();
+                    loadBotMode();
+                }
+            } catch (error) {
+                showAlert('خطأ في تحميل البيانات', 'error');
+            }
+        }
+
+        function populateFields() {
+            if (!currentProfile) return;
+
+            document.getElementById('name').value = currentProfile.name || '';
+            document.getElementById('profession').value = currentProfile.profession || '';
+            document.getElementById('location').value = currentProfile.location || '';
+            document.getElementById('status').value = currentProfile.personalInfo?.status || 'متاح';
+            document.getElementById('personality').value = currentProfile.personalInfo?.personality || '';
+            document.getElementById('workingHours').value = currentProfile.personalInfo?.workingHours || '';
+            
+            // Business info
+            document.getElementById('services').value = currentProfile.services?.join('\n') || '';
+            document.getElementById('experience').value = currentProfile.experience || '';
+            document.getElementById('specialties').value = currentProfile.specialties?.join('\n') || '';
+            
+            // Pricing
+            if (currentProfile.pricing) {
+                document.getElementById('pricing-website').value = currentProfile.pricing.website_development || '';
+                document.getElementById('pricing-chatbot').value = currentProfile.pricing.chatbot_development || '';
+                document.getElementById('pricing-ai').value = currentProfile.pricing.ai_solutions || '';
+                document.getElementById('pricing-consultation').value = currentProfile.pricing.consultation || '';
+            }
+        }
+
+        async function loadBotMode() {
+            try {
+                const response = await fetch('/api/profile/bot-mode');
+                const result = await response.json();
+                
+                if (result.success) {
+                    selectedBotMode = result.data.botMode;
+                    updateModeSelection();
+                }
+            } catch (error) {
+                console.error('Error loading bot mode:', error);
+            }
+        }
+
+        function updateModeSelection() {
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.mode === selectedBotMode) {
+                    card.classList.add('selected');
+                }
+            });
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Mode selection
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedBotMode = card.dataset.mode;
+            });
+        });
+
+        async function updateProfile() {
+            const profileData = {
+                name: document.getElementById('name').value,
+                profession: document.getElementById('profession').value,
+                location: document.getElementById('location').value,
+                personalInfo: {
+                    status: document.getElementById('status').value,
+                    personality: document.getElementById('personality').value,
+                    workingHours: document.getElementById('workingHours').value
+                }
+            };
+
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(profileData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('تم حفظ المعلومات الشخصية بنجاح!', 'success');
+                    loadProfile();
+                } else {
+                    showAlert('خطأ في حفظ البيانات', 'error');
+                }
+            } catch (error) {
+                showAlert('خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function updateBusinessInfo() {
+            const businessData = {
+                services: document.getElementById('services').value.split('\n').filter(s => s.trim()),
+                experience: document.getElementById('experience').value,
+                specialties: document.getElementById('specialties').value.split('\n').filter(s => s.trim()),
+                pricing: {
+                    website_development: document.getElementById('pricing-website').value,
+                    chatbot_development: document.getElementById('pricing-chatbot').value,
+                    ai_solutions: document.getElementById('pricing-ai').value,
+                    consultation: document.getElementById('pricing-consultation').value
+                }
+            };
+
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(businessData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('تم حفظ معلومات العمل بنجاح!', 'success');
+                    loadProfile();
+                } else {
+                    showAlert('خطأ في حفظ البيانات', 'error');
+                }
+            } catch (error) {
+                showAlert('خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function updateBotMode() {
+            try {
+                const response = await fetch('/api/profile/bot-mode', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: selectedBotMode })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('تم تحديث نمط البوت بنجاح!', 'success');
+                } else {
+                    showAlert('خطأ في تحديث النمط', 'error');
+                }
+            } catch (error) {
+                showAlert('خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function quickUpdateStatus() {
+            const status = document.getElementById('quick-status').value;
+            
+            try {
+                const response = await fetch('/api/profile/status', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert('تم تحديث الحالة بنجاح!', 'success');
+                    document.getElementById('status').value = status;
+                } else {
+                    showAlert('خطأ في تحديث الحالة', 'error');
+                }
+            } catch (error) {
+                showAlert('خطأ في الاتصال', 'error');
+            }
+        }
+
+        function exportProfile() {
+            if (currentProfile) {
+                const dataStr = JSON.stringify(currentProfile, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'profile.json';
+                link.click();
+            }
+        }
+
+        function resetProfile() {
+            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟')) {
+                location.reload();
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

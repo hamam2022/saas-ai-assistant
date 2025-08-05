@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار التفاعل الذكي مع الصور - المساعد الذكي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3, #21CBF3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9ff;
+            border: 3px dashed #2196F3;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #1976D2;
+            background: #f0f4ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #2196F3;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #2196F3, #21CBF3);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .analyze-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .preview-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 15px;
+            border-left: 5px solid #2196F3;
+            display: none;
+        }
+
+        .result-header {
+            font-size: 1.4em;
+            color: #2196F3;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .result-text {
+            line-height: 1.6;
+            color: #555;
+            white-space: pre-line;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .metadata {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .metadata-item {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .occasion-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+
+        .audio-section {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #f44336;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #4caf50;
+            margin: 10px 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2196F3;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖✨ التفاعل الذكي مع الصور</h1>
+            <p>ارفع صورة واكتشف كيف يتفاعل المساعد الذكي مع المناسبات والاحتفالات</p>
+        </div>
+
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📸</div>
+                <h3>ارفع صورة للتحليل الذكي</h3>
+                <p>اسحب الصورة هنا أو اضغط للاختيار</p>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    اختر صورة
+                </button>
+            </div>
+
+            <!-- Message Input -->
+            <textarea id="messageInput" class="message-input" 
+                placeholder="اكتب رسالة مع الصورة (اختياري)...&#10;مثال: هذه صورة عيد ميلادي&#10;أو: ما رأيك في هذه الصورة؟"></textarea>
+
+            <!-- Preview Section -->
+            <div id="previewSection" class="preview-section">
+                <h4>معاينة الصورة:</h4>
+                <img id="previewImage" class="preview-image" alt="معاينة">
+            </div>
+
+            <!-- Analyze Button -->
+            <button id="analyzeBtn" class="analyze-btn" disabled onclick="analyzeImage()">
+                🔍 تحليل ذكي للصورة
+            </button>
+
+            <!-- Loading -->
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>جاري التحليل الذكي للصورة...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultSection" class="result-section">
+                <div class="result-header">
+                    <span>🎯</span>
+                    <span>نتائج التحليل الذكي</span>
+                </div>
+
+                <!-- Smart Response -->
+                <div id="smartResponse" class="result-content">
+                    <div class="result-title">💬 الرد الذكي:</div>
+                    <div id="smartResponseText" class="result-text"></div>
+                    <div id="occasionBadge"></div>
+                </div>
+
+                <!-- Audio Response -->
+                <div id="audioResponse" class="audio-section" style="display: none;">
+                    <div class="result-title">🎵 الرد الصوتي:</div>
+                    <p>تم إنشاء رد صوتي مناسب للمناسبة</p>
+                    <audio id="audioPlayer" class="audio-player" controls></audio>
+                </div>
+
+                <!-- Image Analysis -->
+                <div id="imageAnalysis" class="result-content">
+                    <div class="result-title">🖼️ تحليل الصورة:</div>
+                    <div id="imageAnalysisText" class="result-text"></div>
+                </div>
+
+                <!-- Metadata -->
+                <div id="metadata" class="metadata">
+                    <div class="result-title">📊 تفاصيل إضافية:</div>
+                    <div id="metadataContent"></div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUploads">0</div>
+                    <div class="stat-label">صور تم تحليلها</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="occasionsDetected">0</div>
+                    <div class="stat-label">مناسبات تم اكتشافها</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="audioGenerated">0</div>
+                    <div class="stat-label">ردود صوتية</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let stats = {
+            totalUploads: 0,
+            occasionsDetected: 0,
+            audioGenerated: 0
+        };
+
+        // File input handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            selectedFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewSection.style.display = 'block';
+                analyzeBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function analyzeImage() {
+            if (!selectedFile) {
+                showError('يرجى اختيار صورة أولاً');
+                return;
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const userMessage = messageInput.value.trim();
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                formData.append('userMessage', userMessage);
+
+                const response = await fetch('/api/smart-image-interaction', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResults(result.data);
+                    updateStats(result.data);
+                } else {
+                    showError(result.error?.message || 'فشل في تحليل الصورة');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('حدث خطأ في الاتصال بالخادم');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const resultSection = document.getElementById('resultSection');
+            const workflow = data.workflow;
+
+            // Smart Response
+            if (workflow.textResponse && workflow.textResponse.success) {
+                const response = workflow.textResponse.response;
+                document.getElementById('smartResponseText').textContent = response.text;
+
+                // Occasion badge
+                const occasionBadge = document.getElementById('occasionBadge');
+                if (response.occasionDetected && response.occasionDetected !== 'general') {
+                    occasionBadge.innerHTML = `<div class="occasion-badge">🎉 ${response.occasionDetected.replace('_', ' ')}</div>`;
+                } else {
+                    occasionBadge.innerHTML = '';
+                }
+            }
+
+            // Audio Response
+            const audioSection = document.getElementById('audioResponse');
+            if (data.audioResponse && data.audioResponse.audioPath) {
+                audioSection.style.display = 'block';
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = `/api/download-audio/${data.audioResponse.filename}`;
+            } else {
+                audioSection.style.display = 'none';
+            }
+
+            // Image Analysis
+            if (workflow.imageAnalysis && workflow.imageAnalysis.success) {
+                const analysis = workflow.imageAnalysis.analysis;
+                document.getElementById('imageAnalysisText').textContent = 
+                    analysis.description || 'تم تحليل الصورة بنجاح';
+            }
+
+            // Metadata
+            if (workflow.textResponse && workflow.textResponse.response.metadata) {
+                const metadata = workflow.textResponse.response.metadata;
+                let metadataHtml = '';
+
+                if (metadata.visualElements && metadata.visualElements.length > 0) {
+                    metadataHtml += `<div class="metadata-item"><strong>العناصر المرئية:</strong> ${metadata.visualElements.join(', ')}</div>`;
+                }
+
+                if (metadata.emotions && metadata.emotions.length > 0) {
+                    metadataHtml += `<div class="metadata-item"><strong>المشاعر:</strong> ${metadata.emotions.join(', ')}</div>`;
+                }
+
+                if (metadata.peopleCount) {
+                    metadataHtml += `<div class="metadata-item"><strong>عدد الأشخاص:</strong> ${metadata.peopleCount}</div>`;
+                }
+
+                if (metadata.textFound && metadata.textFound.length > 0) {
+                    metadataHtml += `<div class="metadata-item"><strong>النصوص الموجودة:</strong> ${metadata.textFound}</div>`;
+                }
+
+                document.getElementById('metadataContent').innerHTML = metadataHtml;
+            }
+
+            resultSection.style.display = 'block';
+        }
+
+        function updateStats(data) {
+            stats.totalUploads++;
+
+            if (data.workflow.textResponse && 
+                data.workflow.textResponse.response.occasionDetected && 
+                data.workflow.textResponse.response.occasionDetected !== 'general') {
+                stats.occasionsDetected++;
+            }
+
+            if (data.audioResponse && data.audioResponse.audioPath) {
+                stats.audioGenerated++;
+            }
+
+            // Update display
+            document.getElementById('totalUploads').textContent = stats.totalUploads;
+            document.getElementById('occasionsDetected').textContent = stats.occasionsDetected;
+            document.getElementById('audioGenerated').textContent = stats.audioGenerated;
+        }
+
+        function showError(message) {
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = `<div class="error">${message}</div>`;
+            resultSection.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = `<div class="success">${message}</div>`;
+            resultSection.style.display = 'block';
+        }
+
+        // Load stats on page load
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/smart-image/stats');
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('Service Stats:', result.data);
+                }
+            } catch (error) {
+                console.warn('Could not load service stats:', error);
+            }
+        }
+
+        // Initialize
+        loadStats();
+    </script>
+</body>
+</html>

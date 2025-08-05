@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 مساعد الذكاء الاصطناعي - WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #25D366;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px;
+        }
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #25D366;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        .status-online {
+            background: #25D366;
+            animation: pulse 2s infinite;
+        }
+        .status-offline {
+            background: #dc3545;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .feature-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        .test-section {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        .btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #128C7E;
+        }
+        .instructions {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .api-endpoints {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        .qr-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid #25D366;
+        }
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #25D366;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .qr-container img {
+            max-width: 300px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .connected-status {
+            color: #155724;
+            background: #d4edda;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .chat-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+        .user-message {
+            align-self: flex-end;
+            background: #25D366;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-message {
+            align-self: flex-start;
+            background: #e9ecef;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+        .message-content {
+            margin-bottom: 5px;
+        }
+        .message-time {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .chat-input-container {
+            display: flex;
+            padding: 20px;
+            background: #f8f9fa;
+            gap: 10px;
+        }
+        .chat-input-container input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+        }
+        .send-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .send-btn:hover {
+            background: #128C7E;
+        }
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 مساعد الذكاء الاصطناعي</h1>
+            <p>WhatsApp Bot مع OpenAI GPT</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 15px; text-align: center; border-bottom: 1px solid #ddd;">
+            <a href="/" style="color: #25D366; text-decoration: none; margin: 0 15px; font-weight: bold;">🏠 الصفحة الرئيسية</a>
+            <a href="/admin" style="color: #25D366; text-decoration: none; margin: 0 15px; font-weight: bold;">🛠️ إدارة الردود</a>
+            <a href="/profile" style="color: #25D366; text-decoration: none; margin: 0 15px; font-weight: bold;">👤 إدارة الملف الشخصي</a>
+            <a href="/control" style="color: #25D366; text-decoration: none; margin: 0 15px; font-weight: bold;">🎛️ لوحة التحكم</a>
+        </div>
+        
+        <div class="content">
+            <div class="status-card">
+                <h3>حالة النظام <span id="status-indicator" class="status-indicator status-online"></span></h3>
+                <p id="status-text">متصل وجاهز للعمل</p>
+                <p><strong>الخادم:</strong> http://localhost:3001</p>
+                <p><strong>WhatsApp Web:</strong> <span id="whatsapp-status">متصل ✅</span></p>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>WhatsApp Web</h3>
+                    <p>مدمج مع WhatsApp Web لاستقبال وإرسال الرسائل تلقائياً</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>OpenAI GPT</h3>
+                    <p>ردود ذكية ومتقدمة باستخدام أحدث تقنيات الذكاء الاصطناعي</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🇸🇦</div>
+                    <h3>دعم العربية</h3>
+                    <p>يفهم ويرد باللغة العربية بطلاقة وبشكل طبيعي</p>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3>� WhatsApp Web QR Code</h3>
+                <div id="qr-section" class="qr-section">
+                    <div id="qr-loading" class="loading">
+                        <div class="spinner"></div>
+                        <p>جاري تحميل رمز QR...</p>
+                    </div>
+                    <div id="qr-container" class="qr-container" style="display: none;">
+                        <img id="qr-image" src="" alt="WhatsApp QR Code" />
+                        <p>امسح هذا الرمز من تطبيق WhatsApp على هاتفك</p>
+                    </div>
+                    <div id="qr-connected" class="connected-status" style="display: none;">
+                        <div class="success-icon">✅</div>
+                        <h4>WhatsApp متصل بنجاح!</h4>
+                        <p>يمكنك الآن إرسال الرسائل والحصول على ردود تلقائية</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-section">
+                <h3>💬 تجربة المحادثة</h3>
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message bot-message">
+                            <div class="message-content">
+                                مرحباً! أنا مساعدك الذكي. يمكنك تجربة المحادثة معي هنا قبل استخدام WhatsApp.
+                            </div>
+                            <div class="message-time">الآن</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا..." />
+                        <button id="send-button" class="send-btn">إرسال</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3>�🚀 كيفية تجربة النظام</h3>
+                <div class="instructions">
+                    <h4>📋 خطوات التجربة:</h4>
+                    <ol>
+                        <li><strong>امسح رمز QR</strong> أعلاه لربط WhatsApp Web</li>
+                        <li><strong>أرسل رسالة</strong> إلى رقم WhatsApp المتصل بالنظام</li>
+                        <li><strong>انتظر الرد التلقائي</strong> من الذكاء الاصطناعي</li>
+                        <li><strong>جرب رسائل مختلفة</strong> مثل:
+                            <ul>
+                                <li>"مرحبا، كيف حالك؟"</li>
+                                <li>"ما أطول نهر في العالم؟"</li>
+                                <li>"أريد معلومات عن منتجاتكم"</li>
+                                <li>"شكراً لك"</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="api-endpoints">
+                <h3>🔗 API Endpoints المتاحة:</h3>
+                <ul>
+                    <li><strong>GET</strong> /api/health - فحص حالة النظام</li>
+                    <li><strong>GET</strong> /api/bots - معلومات البوتات</li>
+                    <li><strong>POST</strong> /api/chat - محادثة مباشرة</li>
+                    <li><strong>GET</strong> /api/whatsapp-web/status - حالة WhatsApp</li>
+                    <li><strong>POST</strong> /api/whatsapp-web/send - إرسال رسالة</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check server status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('status-indicator').className = 'status-indicator status-online';
+                    document.getElementById('status-text').textContent = 'متصل وجاهز للعمل ✅';
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (error) {
+                document.getElementById('status-indicator').className = 'status-indicator status-offline';
+                document.getElementById('status-text').textContent = 'غير متصل ❌';
+            }
+        }
+
+        // Check WhatsApp status and get QR code
+        async function checkWhatsAppStatus() {
+            try {
+                const response = await fetch('/api/whatsapp-web/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const whatsappStatus = data.data;
+                    
+                    if (whatsappStatus.isReady) {
+                        // WhatsApp is connected
+                        document.getElementById('whatsapp-status').textContent = 'متصل ✅';
+                        document.getElementById('qr-loading').style.display = 'none';
+                        document.getElementById('qr-container').style.display = 'none';
+                        document.getElementById('qr-connected').style.display = 'block';
+                    } else if (whatsappStatus.hasQR && whatsappStatus.qrCode) {
+                        // QR code is available
+                        document.getElementById('whatsapp-status').textContent = 'في انتظار المسح ⏳';
+                        document.getElementById('qr-loading').style.display = 'none';
+                        document.getElementById('qr-connected').style.display = 'none';
+                        document.getElementById('qr-container').style.display = 'block';
+                        document.getElementById('qr-image').src = whatsappStatus.qrCode;
+                    } else {
+                        // Loading or initializing
+                        document.getElementById('whatsapp-status').textContent = 'جاري التحضير ⏳';
+                        document.getElementById('qr-loading').style.display = 'block';
+                        document.getElementById('qr-container').style.display = 'none';
+                        document.getElementById('qr-connected').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('whatsapp-status').textContent = 'غير متصل ❌';
+                }
+            } catch (error) {
+                document.getElementById('whatsapp-status').textContent = 'غير متاح ⚠️';
+            }
+        }
+
+        // Send chat message
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const sendBtn = document.getElementById('send-button');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'جاري الإرسال...';
+            
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Add bot response
+                    addMessage(data.data.botResponse.content, 'bot');
+                } else {
+                    addMessage('عذراً، حدث خطأ في الإرسال.', 'bot');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('عذراً، لا يمكن الاتصال بالخادم.', 'bot');
+            }
+            
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'إرسال';
+        }
+
+        // Add message to chat
+        function addMessage(content, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ar-SA', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${content}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Event listeners
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Check status every 5 seconds
+        checkStatus();
+        checkWhatsAppStatus();
+        setInterval(checkStatus, 30000);
+        setInterval(checkWhatsAppStatus, 5000);
+    </script>
+</body>
+</html>
