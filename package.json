@@ -1,42 +1,28 @@
-{
+﻿{
   "name": "saas-ai-assistant",
   "version": "1.0.0",
-  "description": "AI WhatsApp Assistant - نظام مساعد ذكي متطور يدمج الذكاء الاصطناعي مع WhatsApp",
-  "private": true,
-  "workspaces": [
-    "apps/backend",
-    "apps/frontend",
-    "frontend-simple"
-  ],
+  "description": " AI WhatsApp Assistant - مساعد واتساب ذكي بالذكاء الاصطناعي",
+  "private": false,
+  "main": "apps/backend/simple-server.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "node apps/backend/simple-server.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",       
     "dev:backend": "cd apps/backend && npm run dev",
-    "dev:frontend": "cd apps/frontend && npm run dev",
-    "dev:simple": "cd frontend-simple && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd apps/backend && npm run build",
-    "build:frontend": "cd apps/frontend && npm run build",
-    "install:all": "npm install && cd apps/backend && npm install && cd ../frontend && npm install && cd ../frontend-simple && npm install",
-    "start": "npm run start:backend",
-    "start:backend": "cd apps/backend && npm start",
-    "start:frontend": "cd apps/frontend && npm start",
-    "test": "npm run test:backend",
-    "test:backend": "cd apps/backend && npm test",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "lint:backend": "cd apps/backend && npm run lint",
-    "lint:frontend": "cd apps/frontend && npm run lint",
-    "clean": "npm run clean:backend && npm run clean:frontend",
-    "clean:backend": "cd apps/backend && rm -rf node_modules dist",
-    "clean:frontend": "cd apps/frontend && rm -rf node_modules .next",
-    "pm2:start": "pm2 start apps/backend/simple-server.js --name saas-ai-bot && pm2 start apps/backend/bot-manager.js --name bot-manager",
-    "pm2:stop": "pm2 stop saas-ai-bot bot-manager",
-    "pm2:restart": "pm2 restart saas-ai-bot bot-manager",
-    "pm2:logs": "pm2 logs",
+    "dev:frontend": "cd frontend-simple && npm run dev",
+    "build": "npm run install:backend",
+    "install:backend": "cd apps/backend && npm install",
+    "install:frontend": "cd frontend-simple && npm install", 
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "test": "echo \"No tests specified\"",
+    "postinstall": "npm run install:backend",
+    "pm2:start": "pm2 start apps/backend/simple-server.js --name whatsapp-bot",
+    "pm2:stop": "pm2 stop whatsapp-bot",
+    "pm2:restart": "pm2 restart whatsapp-bot",
+    "pm2:logs": "pm2 logs whatsapp-bot",
     "pm2:status": "pm2 status",
-    "deploy:prod": "npm run build && npm run pm2:restart",
-    "setup": "npm run install:all && cd apps/backend && npx prisma generate && npx prisma db push"
+    "deploy": "npm install && npm start"
   },
-  "devDependencies": {
+  "dependencies": {
     "concurrently": "^8.2.0"
   },
   "engines": {
@@ -45,23 +31,25 @@
   },
   "keywords": [
     "whatsapp",
-    "bot",
+    "bot", 
     "ai",
     "assistant",
     "chatbot",
     "openai",
-    "typescript",
-    "node.js",
-    "arabic"
+    "gpt4",
+    "nodejs",
+    "express",
+    "arabic",
+    "pm2"
   ],
-  "author": "Your Name",
+  "author": "hamam2022",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/saas-ai-assistant.git"
+    "url": "https://github.com/hamam2022/saas-ai-assistant.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/saas-ai-assistant/issues"
+    "url": "https://github.com/hamam2022/saas-ai-assistant/issues"
   },
-  "homepage": "https://github.com/your-username/saas-ai-assistant#readme"
+  "homepage": "https://github.com/hamam2022/saas-ai-assistant#readme"
 }

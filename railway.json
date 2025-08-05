@@ -1,0 +1,20 @@
+﻿{
+  "": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "node apps/backend/simple-server.js",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "NODE_ENV": "production",
+        "PORT": "3001"
+      }
+    }
+  }
+}
